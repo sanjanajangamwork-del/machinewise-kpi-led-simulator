@@ -118,7 +118,8 @@ docker build -t machinewise-kpi .
 ### Run Docker Container
 
 ```bash
-docker run --name machinewise-kpi-test --env-file .env -it machinewise-kpi:latest```
+docker run --name machinewise-kpi-test --env-file .env -it machinewise-kpi:latest
+```
 
 ### Configuration
 
