@@ -16,7 +16,7 @@ MQTT_BROKER = "machinewiseapp.in"
 MQTT_PORT = 1883
 MQTT_TOPIC = "machinewise/led/strip1/push"
 
-ENABLE_LED_PUBLISH = True
+ENABLE_LED_PUBLISH = False
 
 sio = socketio.Client()
 mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)

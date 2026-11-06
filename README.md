@@ -98,4 +98,40 @@ python test_connect.py
 6. Publish the LED update through MQTT.
 7. Visualize machine conditions through the LED indicators.
 
- 
+## Running with Docker
+
+This project can run inside a Docker container without requiring Python or the project dependencies to be installed locally.
+
+### Prerequisites
+
+- Docker Desktop installed and running.
+- A valid `.env` configuration file.
+
+### Build Docker Image
+
+Clone the repository and navigate to the project directory.
+
+```bash
+docker build -t machinewise-kpi .
+```
+
+### Run Docker Container
+
+```bash
+docker run --rm --env-file .env machinewise-kpi
+```
+
+### Configuration
+
+The application reads its configuration from the `.env` file.
+
+Create your own `.env` file using the required configuration variables. Do not commit this file to GitHub.
+
+### Docker Files
+
+- `Dockerfile` — Defines the Python environment, installs dependencies and configures the application startup command.
+- `.dockerignore` — Excludes unnecessary files from the Docker build context.
+
+### Stop the Container
+
+Press `Ctrl + C` in the terminal to stop the running application.
