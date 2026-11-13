@@ -16,6 +16,10 @@ MACHINES = {
     "machine1": {
         "machine_id": os.getenv("MACHINE_KPI_CHANNEL_ID"),
         "strip": "strip1"
+    },
+    "machine2": {
+        "machine_id": "68c6d5cdf99a894b7b38d35a",
+        "strip": "strip2"
     }
 }
 
