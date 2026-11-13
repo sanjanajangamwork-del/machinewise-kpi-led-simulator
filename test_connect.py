@@ -4,6 +4,7 @@ import socketio
 import paho.mqtt.client as mqtt
 from collections import Counter
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -12,16 +13,45 @@ load_dotenv()
 
 SERVER_URL = "https://dev.machinewiseapp.in"
 
-MACHINES = {
-    "machine1": {
-        "machine_id": os.getenv("MACHINE_KPI_CHANNEL_ID"),
-        "strip": "strip1"
-    },
-    "machine2": {
-        "machine_id": "68c6d5cdf99a894b7b38d35a",
-        "strip": "strip2"
-    }
-}
+with open("machines.json", "r") as file:
+    machine_config = json.load(file)
+
+if not isinstance(machine_config.get("machines"), list):
+    raise ValueError("'machines' must be a list in machines.json")
+
+MACHINES = {}
+
+used_ids = set()
+used_strips = set()
+
+for machine in machine_config["machines"]:
+
+    required_fields = ["name", "machine_id", "strip"]
+
+    for field in required_fields:
+        if not machine.get(field):
+            raise ValueError(f"Missing '{field}' in machine configuration")
+
+    name = machine["name"]
+    machine_id = machine["machine_id"]
+    strip = machine["strip"]
+
+    if name in MACHINES:
+        raise ValueError(f"Duplicate machine name: {name}")
+
+    if machine_id in used_ids:
+        raise ValueError(f"Duplicate machine ID: {machine_id}")
+
+    if strip in used_strips:
+        raise ValueError(f"Strip assigned more than once: {strip}")
+
+    MACHINES[name] = machine
+
+    used_ids.add(machine_id)
+    used_strips.add(strip)
+
+if not MACHINES:
+    raise ValueError("No machines configured in machines.json")
 
 INTERVAL_SECONDS = int(os.getenv("INTERVAL_SECONDS", 30))
 
@@ -160,26 +190,17 @@ def disconnect():
 @sio.on("*")
 def receive_kpi(event, data):
 
-    print("\n--- KPI EVENT RECEIVED ---")
-    print("EVENT:", event)
-
     machine_id = (
         data.get("machineId")
         if isinstance(data, dict)
         else None
     )
 
-    print("MACHINE ID:", machine_id)
-
     if machine_id not in machine_status_updates:
-        print("Machine not found in configuration!")
         return
 
     status = get_machine_status(data)
-
     machine_status_updates[machine_id].append(status)
-
-    print("STATUS ADDED:", status)
 
 
 # ---------------- MAIN PROGRAM ----------------
@@ -192,15 +213,8 @@ def main():
 
     if not machine_status_updates:
         raise ValueError(
-            "No machine configured. Check MACHINE_KPI_CHANNEL_ID in .env"
+            "No machine configured. Check machines.json"
         )
-
-    for config in MACHINES.values():
-
-        if not config["machine_id"]:
-            raise ValueError(
-                "A machine ID is missing. Check your .env configuration."
-            )
 
     mqtt_client.on_connect = on_mqtt_connect
 
@@ -253,12 +267,11 @@ def main():
 
                         mqtt_topic = f"machinewise/led/{strip}/push"
 
-                        print(f"\nMachine ID: {machine_id}")
-                        print(f"LED Strip: {strip}")
-                        print(f"Machine Status: {currentStatus}")
-                        print(f"Generated LED Command: {led_message}")
-                        print(f"MQTT Topic: {mqtt_topic}")
-
+                        print(f"Machine: {config['name']}")
+                        print(f"Status:  {currentStatus}")
+                        print(f"Strip:   {strip}")
+                        print(f"Command: {led_message}")
+                        print(f"Topic:   {mqtt_topic}")
                         if ENABLE_LED_PUBLISH:
 
                             result = mqtt_client.publish(
