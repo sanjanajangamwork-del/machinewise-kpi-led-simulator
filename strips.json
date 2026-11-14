@@ -1,0 +1,12 @@
+{
+    "strip2": {
+        "led_count": 60,
+        "mode": "preset",
+        "topic": "machinewise/led/strip2"
+    },
+    "strip3": {
+        "led_count": 60,
+        "mode": "preset",
+        "topic": "machinewise/led/strip3"
+    }
+}

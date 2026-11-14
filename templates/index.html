@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MachineWise | LED Controller</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div>
+      <span class="eyebrow">MACHINEWISE · EXHIBITION SYSTEM</span>
+      <h1>LED Strip Controller</h1>
+    </div>
+    <span class="connection"><i></i> Backend connected</span>
+  </header>
+
+  <main>
+
+    <section class="intro">
+      <div>
+        <h2>Control your display strips</h2>
+        <p>Create colour patterns, configure strips and preview commands before sending them.</p>
+      </div>
+      <div class="safe-badge">DRY-RUN MODE · NO HARDWARE COMMANDS SENT</div>
+    </section>
+
+    <div id="message" class="notice" role="status"></div>
+
+    <div class="grid">
+
+      <!-- PRESET MANAGER -->
+      <section class="card">
+
+        <div class="card-heading">
+          <div>
+            <span class="step">01</span>
+            <h2>Preset manager</h2>
+          </div>
+          <span class="muted">Create LED patterns</span>
+        </div>
+
+        <label for="presetName">Preset name</label>
+        <input
+          id="presetName"
+          type="text"
+          placeholder="e.g. Welcome pattern"
+        >
+
+        <label for="presetColors">LED sequence</label>
+        <input
+          id="presetColors"
+          type="text"
+          placeholder="R,R,R,G,G,G,G"
+        >
+
+        <p class="muted">Enter colour codes separated by commas.</p>
+
+        <button id="savePresetBtn" class="button primary full">
+          Save preset
+        </button>
+
+        <div class="divider"></div>
+
+        <h3>Saved presets</h3>
+
+        <div id="presetList" class="item-list">
+          <p class="empty">Loading presets…</p>
+        </div>
+
+      </section>
+
+
+      <!-- STRIP CONFIGURATION -->
+      <section class="card">
+
+        <div class="card-heading">
+          <div>
+            <span class="step">02</span>
+            <h2>Strip configuration</h2>
+          </div>
+          <span class="muted">Register LED strips</span>
+        </div>
+
+        <label for="stripId">Strip ID</label>
+        <input
+          id="stripId"
+          type="text"
+          placeholder="strip2"
+        >
+
+        <label for="stripLedCount">LED count</label>
+        <input
+          id="stripLedCount"
+          type="number"
+          min="1"
+          value="60"
+        >
+
+        <label for="stripMode">Assigned mode</label>
+        <select id="stripMode">
+          <option value="clock">Clock (Live machine data)</option>
+          <option value="preset">Preset</option>
+        </select>
+
+        <button id="registerStripBtn" class="button primary full">
+          Register strip
+        </button>
+
+        <div class="divider"></div>
+
+        <h3>Registered strips</h3>
+
+        <div id="stripList" class="item-list">
+          <p class="empty">Loading strips…</p>
+        </div>
+
+      </section>
+
+
+      <!-- STRIP CONTROLLER -->
+      <section class="card controller-card">
+
+        <div class="card-heading">
+          <div>
+            <span class="step">03</span>
+            <h2>Strip controller</h2>
+          </div>
+          <span class="muted">Preview an output</span>
+        </div>
+
+        <label for="targetStrip">Select strip</label>
+        <select id="targetStrip">
+          <option value="">Choose a strip</option>
+        </select>
+
+        <label for="targetPreset">Select preset</label>
+        <select id="targetPreset">
+          <option value="">Choose a preset</option>
+        </select>
+
+        <button id="applyPresetBtn" class="button primary full">
+          Preview apply command
+        </button>
+
+        <div id="applyResult" class="result-box">
+          <p class="empty">
+            Your generated MQTT topic and LED frame will appear here.
+          </p>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    MachineWise LED Controller
+    <span>Local development interface</span>
+  </footer>
+
+</body>
+</html>

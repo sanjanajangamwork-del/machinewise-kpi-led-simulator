@@ -1,0 +1,110 @@
+{
+    "Red Green Pattern": {
+        "led_count": 7,
+        "colors": [
+            "R",
+            "R",
+            "R",
+            "G",
+            "G",
+            "G",
+            "G"
+        ]
+    },
+    "Blue Pattern": {
+        "led_count": 5,
+        "colors": [
+            "B",
+            "B",
+            "B",
+            "W",
+            "W"
+        ]
+    },
+    "bngf": {
+        "led_count": 10,
+        "colors": [
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R"
+        ]
+    },
+    "WELCOME": {
+        "led_count": 10,
+        "colors": [
+            "K",
+            "K",
+            "K",
+            "K",
+            "K",
+            "K",
+            "K",
+            "K",
+            "K",
+            "K"
+        ]
+    },
+    "preset1": {
+        "led_count": 9,
+        "colors": [
+            "R",
+            "R",
+            "R",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G"
+        ]
+    },
+    "Test Pattern": {
+        "led_count": 7,
+        "colors": [
+            "R",
+            "R",
+            "R",
+            "G",
+            "G",
+            "G",
+            "G"
+        ]
+    },
+    "test pattern 2": {
+        "led_count": 10,
+        "colors": [
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G"
+        ]
+    },
+    "pattern2": {
+        "led_count": 10,
+        "colors": [
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R",
+            "R"
+        ]
+    }
+}
