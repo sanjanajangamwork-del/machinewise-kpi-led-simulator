@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 
 from strips import load_strips, save_strip, get_strip
-from presets import load_presets, save_preset, get_preset
+from presets import load_presets, save_preset, get_preset, apply_preset
 
 app = Flask(__name__)
 
@@ -54,6 +54,8 @@ def apply_preset_api(name):
     if not strip_id:
         return jsonify({"error": "Strip is required"}), 400
 
+    strip_id = strip_id.strip().lower()
+
     strip = get_strip(strip_id)
 
     if strip is None:
@@ -64,20 +66,18 @@ def apply_preset_api(name):
             "error": "Selected strip is not configured for presets"
         }), 400
 
-    preset = get_preset(name)
+    try:
+        result = apply_preset(name, strip_id)
 
-    if preset is None:
-        return jsonify({"error": "Preset not found"}), 404
+        return jsonify({
+            "message": "Preset published successfully!",
+            "strip": strip_id,
+            "topic": result["topic"],
+            "led_data": result["led_data"]
+        })
 
-    message = "{" + ",".join(preset["colors"]) + "}"
-
-    return jsonify({
-        "message": "Dry run successful. No MQTT message published.",
-        "strip": strip_id,
-        "topic": f"{strip_id and 'machinewise/led/' + strip_id}/set",
-        "led_data": message
-    })
-
+    except (ValueError, RuntimeError, TimeoutError, OSError) as error:
+        return jsonify({"error": str(error)}), 500
 
 # STRIP MANAGEMENT
 
@@ -121,5 +121,5 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=5000,
-        debug=True
+        debug=False
     )

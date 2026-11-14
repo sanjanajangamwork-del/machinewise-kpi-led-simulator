@@ -56,8 +56,7 @@ def get_led_code(status):
 
 
 def create_led_message(status):
-    return f"60{get_led_code(status)}"
-
+    return get_led_code(status)
 
 def calculate_currentStatus():
     if not status_updates:

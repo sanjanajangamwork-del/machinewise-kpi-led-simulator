@@ -1,4 +1,9 @@
 {
+    "strip1": {
+        "led_count": 60,
+        "mode": "clock",
+        "topic": "machinewise/led/strip1"
+    },
     "strip2": {
         "led_count": 60,
         "mode": "preset",
@@ -8,5 +13,15 @@
         "led_count": 60,
         "mode": "preset",
         "topic": "machinewise/led/strip3"
+    },
+    "strip4": {
+        "led_count": 60,
+        "mode": "preset",
+        "topic": "machinewise/led/strip4"
+    },
+    "strip5": {
+        "led_count": 60,
+        "mode": "preset",
+        "topic": "machinewise/led/strip5"
     }
 }

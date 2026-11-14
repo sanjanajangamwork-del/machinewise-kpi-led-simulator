@@ -1,0 +1,21 @@
+﻿services:
+  web:
+    build: .
+    container_name: machinewise-web
+    command: python -u app.py
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./presets.json:/app/presets.json
+      - ./strips.json:/app/strips.json
+    restart: unless-stopped
+
+  live-listener:
+    build: .
+    container_name: machinewise-live-listener
+    command: python -u test_connect.py
+    env_file:
+      - .env
+    restart: unless-stopped

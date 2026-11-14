@@ -39,6 +39,7 @@ def save_preset(name, colors):
 def get_preset(name):
     presets = load_presets()
     return presets.get(name)
+
 def apply_preset(name, strip):
     preset = get_preset(name)
 
@@ -47,15 +48,31 @@ def apply_preset(name, strip):
 
     colors = preset["colors"]
     message = "{" + ",".join(colors) + "}"
-
     topic = f"machinewise/led/{strip}/set"
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
     try:
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
-        client.publish(topic, message, qos=1, retain=True)
+        client.loop_start()
+
+        result = client.publish(
+            topic,
+            message,
+            qos=1,
+            retain=True
+        )
+
+        result.wait_for_publish(timeout=10)
+
+        if not result.is_published():
+            raise TimeoutError("MQTT publish timed out")
+
+        return {
+            "topic": topic,
+            "led_data": message
+        }
+
+    finally:
+        client.loop_stop()
         client.disconnect()
-        print(f"Preset '{name}' applied to {strip}")
-    except Exception as error:
-        print(f"MQTT Error: {error}")

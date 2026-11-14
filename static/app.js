@@ -83,32 +83,10 @@ $("savePresetBtn").onclick = async () => {
 async function loadPresets() {
     const presets = await api("/presets");
 
-    $("presetList").innerHTML = "";
     $("targetPreset").innerHTML =
         '<option value="">Choose a preset</option>';
 
-    const names = Object.keys(presets);
-
-    if (names.length === 0) {
-        $("presetList").innerHTML =
-            '<p class="empty">No presets saved yet.</p>';
-    }
-
-    names.forEach(name => {
-        const preset = presets[name];
-
-        const item = document.createElement("div");
-        item.className = "item";
-
-        const title = document.createElement("span");
-        title.textContent = name;
-
-        const details = document.createElement("small");
-        details.textContent = `${preset.led_count} LEDs`;
-
-        item.append(title, details);
-        $("presetList").appendChild(item);
-
+    Object.keys(presets).forEach(name => {
         const option = document.createElement("option");
         option.value = name;
         option.textContent = name;
@@ -158,32 +136,10 @@ $("registerStripBtn").onclick = async () => {
 async function loadStrips() {
     const strips = await api("/strips");
 
-    $("stripList").innerHTML = "";
     $("targetStrip").innerHTML =
         '<option value="">Choose a strip</option>';
 
-    const ids = Object.keys(strips);
-
-    if (ids.length === 0) {
-        $("stripList").innerHTML =
-            '<p class="empty">No strips registered yet.</p>';
-    }
-
-    ids.forEach(id => {
-        const strip = strips[id];
-
-        const item = document.createElement("div");
-        item.className = "item";
-
-        const title = document.createElement("span");
-        title.textContent = id;
-
-        const details = document.createElement("small");
-        details.textContent = `${strip.led_count} LEDs · ${strip.mode}`;
-
-        item.append(title, details);
-        $("stripList").appendChild(item);
-
+    Object.keys(strips).forEach(id => {
         const option = document.createElement("option");
         option.value = id;
         option.textContent = id;
@@ -216,7 +172,7 @@ $("applyPresetBtn").onclick = async () => {
         $("applyResult").innerHTML = "";
 
         const heading = document.createElement("strong");
-        heading.textContent = "DRY-RUN OUTPUT";
+        heading.textContent = "COMMAND PUBLISHED";
 
         const topic = document.createElement("code");
         topic.textContent = `Topic: ${result.topic}`;
@@ -226,11 +182,11 @@ $("applyPresetBtn").onclick = async () => {
 
         const message = document.createElement("p");
         message.className = "empty";
-        message.textContent = result.message;
+        message.textContent = result.message || "Preset applied successfully.";
 
         $("applyResult").append(heading, topic, frame, message);
 
-        notice("Command preview generated. No MQTT message published.");
+        notice("Preset applied and MQTT command published.");
 
     } catch (error) {
         notice(error.message, "error");

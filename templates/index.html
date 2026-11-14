@@ -22,10 +22,9 @@
 
     <section class="intro">
       <div>
-        <h2>Control your display strips</h2>
-        <p>Create colour patterns, configure strips and preview commands before sending them.</p>
+        <h2>LED Strip Management</h2>
+        <p>Create LED presets, configure display strips and apply patterns.</p>
       </div>
-      <div class="safe-badge">DRY-RUN MODE · NO HARDWARE COMMANDS SENT</div>
     </section>
 
     <div id="message" class="notice" role="status"></div>
@@ -62,14 +61,6 @@
         <button id="savePresetBtn" class="button primary full">
           Save preset
         </button>
-
-        <div class="divider"></div>
-
-        <h3>Saved presets</h3>
-
-        <div id="presetList" class="item-list">
-          <p class="empty">Loading presets…</p>
-        </div>
 
       </section>
 
@@ -110,14 +101,6 @@
           Register strip
         </button>
 
-        <div class="divider"></div>
-
-        <h3>Registered strips</h3>
-
-        <div id="stripList" class="item-list">
-          <p class="empty">Loading strips…</p>
-        </div>
-
       </section>
 
 
@@ -129,7 +112,7 @@
             <span class="step">03</span>
             <h2>Strip controller</h2>
           </div>
-          <span class="muted">Preview an output</span>
+          <span class="muted">Apply a preset</span>
         </div>
 
         <label for="targetStrip">Select strip</label>
@@ -143,12 +126,12 @@
         </select>
 
         <button id="applyPresetBtn" class="button primary full">
-          Preview apply command
+          Apply preset
         </button>
 
         <div id="applyResult" class="result-box">
           <p class="empty">
-            Your generated MQTT topic and LED frame will appear here.
+            Applied command details will appear here.
           </p>
         </div>
 
@@ -156,11 +139,6 @@
 
     </div>
   </main>
-
-  <footer>
-    MachineWise LED Controller
-    <span>Local development interface</span>
-  </footer>
 
 </body>
 </html>
