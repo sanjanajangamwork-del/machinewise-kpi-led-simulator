@@ -49,7 +49,6 @@ def apply_preset(name, strip):
     colors = preset["colors"]
     message = "{" + ",".join(colors) + "}"
     topic = f"machinewise/led/{strip}/set"
-
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
     try:

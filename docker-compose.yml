@@ -10,6 +10,7 @@
     volumes:
       - ./presets.json:/app/presets.json
       - ./strips.json:/app/strips.json
+      - ./machine_config.json:/app/machine_config.json
     restart: unless-stopped
 
   live-listener:
@@ -18,4 +19,6 @@
     command: python -u test_connect.py
     env_file:
       - .env
+    volumes:
+      - ./machine_config.json:/app/machine_config.json
     restart: unless-stopped

@@ -1,9 +1,61 @@
+import json
+from pathlib import Path
+import os
+
 from flask import Flask, request, jsonify, render_template
 
 from strips import load_strips, save_strip, get_strip
 from presets import load_presets, save_preset, get_preset, apply_preset
 
 app = Flask(__name__)
+
+CONFIG_FILE = Path(__file__).parent / "machine_config.json"
+
+
+# MACHINE CONFIGURATION
+
+def load_machine_config():
+    if not CONFIG_FILE.exists():
+        return {
+            "machine_kpi_channel_id": os.getenv(
+                "MACHINE_KPI_CHANNEL_ID", ""
+            )
+        }
+
+    with open(CONFIG_FILE, "r") as file:
+        return json.load(file)
+
+
+def save_machine_config(channel_id):
+    config = {
+        "machine_kpi_channel_id": channel_id
+    }
+
+    with open(CONFIG_FILE, "w") as file:
+        json.dump(config, file, indent=4)
+
+
+@app.route("/machine-config", methods=["GET"])
+def get_machine_config():
+    return jsonify(load_machine_config())
+
+
+@app.route("/machine-config", methods=["POST"])
+def update_machine_config():
+    data = request.get_json() or {}
+    channel_id = data.get("machine_kpi_channel_id")
+
+    if not isinstance(channel_id, str) or not channel_id.strip():
+        return jsonify({"error": "Enter a valid KPI Channel ID"}), 400
+
+    channel_id = channel_id.strip()
+
+    save_machine_config(channel_id)
+
+    return jsonify({
+        "message": "Machine KPI Channel ID updated successfully",
+        "machine_kpi_channel_id": channel_id
+    })
 
 
 # HOME
@@ -78,6 +130,7 @@ def apply_preset_api(name):
 
     except (ValueError, RuntimeError, TimeoutError, OSError) as error:
         return jsonify({"error": str(error)}), 500
+
 
 # STRIP MANAGEMENT
 

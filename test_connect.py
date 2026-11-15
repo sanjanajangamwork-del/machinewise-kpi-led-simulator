@@ -1,29 +1,56 @@
 import os
+import json
 import time
 import socketio
 import paho.mqtt.client as mqtt
+
+from pathlib import Path
 from collections import Counter
 from dotenv import load_dotenv
 
 load_dotenv()
 
 SERVER_URL = "https://dev.machinewiseapp.in"
-KPI_CHANNEL_ID = os.getenv("MACHINE_KPI_CHANNEL_ID")
-KPI_CHANNEL = f"kpi/{KPI_CHANNEL_ID}"
+CONFIG_FILE = Path(__file__).parent / "machine_config.json"
+
 INTERVAL_SECONDS = int(os.getenv("INTERVAL_SECONDS", 30))
+CONFIG_CHECK_SECONDS = 2
 
 MQTT_BROKER = "machinewiseapp.in"
 MQTT_PORT = 1883
 MQTT_TOPIC = "machinewise/led/strip1/push"
 
-ENABLE_LED_PUBLISH = False
+ENABLE_LED_PUBLISH = True
 
 sio = socketio.Client()
 mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
-status_updates = []
-window_start = time.time()   
+KPI_CHANNEL_ID = None
+KPI_CHANNEL = None
 
+status_updates = []
+window_start = time.time()
+
+
+# CONFIGURATION
+
+def load_channel_id():
+    try:
+        with open(CONFIG_FILE, "r") as file:
+            config = json.load(file)
+
+        channel_id = config.get("machine_kpi_channel_id", "")
+
+        if isinstance(channel_id, str) and channel_id.strip():
+            return channel_id.strip()
+
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        pass
+
+    return os.getenv("MACHINE_KPI_CHANNEL_ID", "").strip()
+
+
+# MACHINE STATUS
 
 def get_machine_status(data):
     if not isinstance(data, dict):
@@ -58,6 +85,7 @@ def get_led_code(status):
 def create_led_message(status):
     return get_led_code(status)
 
+
 def calculate_currentStatus():
     if not status_updates:
         return None
@@ -70,13 +98,13 @@ def calculate_currentStatus():
         if count == highest_count
     }
 
-    currentStatus = next(
+    return next(
         status for status in reversed(status_updates)
         if status in tied_statuses
     )
 
-    return currentStatus
 
+# MQTT
 
 def on_mqtt_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
@@ -85,29 +113,44 @@ def on_mqtt_connect(client, userdata, flags, reason_code, properties):
         print("MQTT connection failed:", reason_code)
 
 
-@sio.event
-def connect():
-    print("Connected to MachineWise")
-    print("Subscribing to:", KPI_CHANNEL)
-    sio.emit("subscribe", KPI_CHANNEL)
+# MACHINEWISE CONNECTION
 
-
-@sio.event
-def connect_error(error):
-    print("Connection error:", error)
-
-
-@sio.event
-def disconnect():
-    print("Disconnected from MachineWise")
-
-
-@sio.on("*")
-@sio.on(KPI_CHANNEL)
 def receive_kpi(data):
     status = get_machine_status(data)
     status_updates.append(status)
 
+
+def connect_machinewise(channel_id):
+    global KPI_CHANNEL_ID, KPI_CHANNEL
+
+    if sio.connected:
+        sio.disconnect()
+
+    KPI_CHANNEL_ID = channel_id
+    KPI_CHANNEL = f"kpi/{channel_id}"
+
+    print("Connecting to MachineWise...")
+    print("KPI Channel:", KPI_CHANNEL)
+
+    sio.connect(
+        SERVER_URL,
+        socketio_path="/socket.io",
+        transports=["websocket"]
+    )
+
+    sio.on(KPI_CHANNEL, handler=receive_kpi)
+
+    sio.emit("subscribe", KPI_CHANNEL)
+
+    print("Subscribed to:", KPI_CHANNEL)
+
+
+def disconnect_machinewise():
+    if sio.connected:
+        sio.disconnect()
+
+
+# MAIN
 
 def main():
     global window_start
@@ -128,24 +171,41 @@ def main():
         if not mqtt_client.is_connected():
             raise ConnectionError("Could not connect to MQTT broker")
 
-        sio.connect(
-            SERVER_URL,
-            socketio_path="/socket.io",
-            transports=["websocket"]
-        )
+        current_channel = load_channel_id()
+
+        if not current_channel:
+            raise ValueError("Machine KPI Channel ID is not configured")
+
+        connect_machinewise(current_channel)
 
         window_start = time.time()
+        last_config_check = time.time()
 
         while True:
             time.sleep(0.5)
 
+            # CHECK FOR CHANNEL CHANGES
+
+            if time.time() - last_config_check >= CONFIG_CHECK_SECONDS:
+                new_channel = load_channel_id()
+
+                if new_channel and new_channel != KPI_CHANNEL_ID:
+                    print("\nKPI Channel ID changed!")
+                    status_updates.clear()
+                    connect_machinewise(new_channel)
+                    window_start = time.time()
+
+                last_config_check = time.time()
+
+            # COLLECT MACHINE STATUS
+
             if time.time() - window_start >= INTERVAL_SECONDS:
-                currentStatus = calculate_currentStatus()
+                current_status = calculate_currentStatus()
 
-                if currentStatus:
-                    led_message = create_led_message(currentStatus)
+                if current_status:
+                    led_message = create_led_message(current_status)
 
-                    print(f"Machine Status: {currentStatus}")
+                    print(f"Machine Status: {current_status}")
                     print(f"Generated LED Command: {led_message}")
 
                     if ENABLE_LED_PUBLISH:
@@ -176,9 +236,7 @@ def main():
         print("Error:", error)
 
     finally:
-        if sio.connected:
-            sio.disconnect()
-
+        disconnect_machinewise()
         mqtt_client.loop_stop()
         mqtt_client.disconnect()
 
