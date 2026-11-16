@@ -18,8 +18,8 @@ def load_strips():
 def save_strip(strip_id, led_count, mode):
     strip_id = strip_id.strip().lower()
 
-    if not re.fullmatch(r"strip[1-5]", strip_id):
-        raise ValueError("Strip ID must be strip1 to strip5")
+    if not re.fullmatch(r"strip[1-9]\d*", strip_id):
+        raise ValueError("Strip ID must be strip1 or higher")
 
     if not isinstance(led_count, int) or led_count <= 0:
         raise ValueError("LED count must be a positive number")
